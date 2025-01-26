@@ -1,4 +1,4 @@
-internal typealias pthread_t = MemoryAddress
+internal typealias pthread_t = Int // UInt64
 
 internal type pthread_attr_t : Deinitializable {
   var p0: MemoryAddress
@@ -35,20 +35,6 @@ internal type pthread_attr_t : Deinitializable {
 
 }
 
-// public conformance pthread_attr_init: ForeignConvertible {
-
-//   public typealias ForeignRepresentation = Builtin.ptr
-
-//   public init(foreign_value: sink Builtin.ptr) {
-//     &self.base = foreign_value
-//   }
-
-//   public fun foreign_value() -> Builtin.ptr {
-//     base
-//   }
-
-// }
-
 @ffi("pthread_attr_init")
 internal fun pthread_attr_init(_ attr: PointerToMutable<pthread_attr_t>) -> Int
 @ffi("pthread_attr_setstacksize")
@@ -58,6 +44,6 @@ internal fun pthread_attr_destroy(_ attr: PointerToMutable<pthread_attr_t>) -> I
 @ffi("pthread_create")
 internal fun pthread_create(_ thread: PointerToMutable<pthread_t>, _ attr: PointerToMutable<pthread_attr_t>, _ f: MemoryAddress) -> Int
 @ffi("pthread_join")
-internal fun pthread_join(_ thread: PointerToMutable<pthread_t>, _ ret: PointerToMutable<MemoryAddress>) -> Int
+internal fun pthread_join(_ thread: pthread_t, _ ret: PointerToMutable<MemoryAddress>) -> Int
 @ffi("pthread_detach")
-internal fun pthread_detach(_ thread: PointerToMutable<pthread_t>) -> Int
+internal fun pthread_detach(_ thread: pthread_t) -> Int

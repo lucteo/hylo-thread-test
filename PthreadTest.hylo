@@ -15,20 +15,19 @@ fun deref(_ p: MemoryAddress) -> MemoryAddress {
 }
 
 public fun main() {
-  var thread_id: pthread_t = .null()
+  var thread_id: pthread_t = 0
   var attr: pthread_attr_t = .new()
-  var ret: MemoryAddress = .null()
 
   let pattr = mutable_pointer[to: &attr]
-  let ptid = mutable_pointer[to: &thread_id]
   var pf = deref(take_address(fun () { thread_function() }))
 
   let _ = pthread_attr_init(pattr)
   let _ = pthread_attr_setstacksize(pattr, 8 * 1024 * 1024)
-  let _ = pthread_create(ptid, pattr, pf)
+  let _ = pthread_create(mutable_pointer[to: &thread_id], pattr, pf)
   
-  let _ = sleep(1)
+  // let _ = sleep(1)
 
-  let _ = pthread_join(ptid, mutable_pointer[to: &ret])
-  let _ = pthread_detach(ptid)
+  var ret: MemoryAddress = .null()
+  let _ = pthread_join(thread_id, mutable_pointer[to: &ret])
+  let _ = pthread_detach(thread_id)
 }
