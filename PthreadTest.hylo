@@ -1,0 +1,34 @@
+
+@ffi("sleep")
+fun sleep(_ seconds: Int) -> Int
+
+fun thread_function() {
+  print("Hello from thread!")
+}
+
+fun take_address<T>(_ x: inout T) -> MemoryAddress {
+  return MemoryAddress(type_punning: mutable_pointer[to: &x])
+}
+
+fun deref(_ p: MemoryAddress) -> MemoryAddress {
+  return PointerToMutable<MemoryAddress>(type_punning: p).unsafe_pointee()
+}
+
+public fun main() {
+  var thread_id: pthread_t = .null()
+  var attr: pthread_attr_t = .new()
+  var ret: MemoryAddress = .null()
+
+  let pattr = mutable_pointer[to: &attr]
+  let ptid = mutable_pointer[to: &thread_id]
+  var pf = deref(take_address(fun () { thread_function() }))
+
+  let _ = pthread_attr_init(pattr)
+  let _ = pthread_attr_setstacksize(pattr, 8 * 1024 * 1024)
+  let _ = pthread_create(ptid, pattr, pf)
+  
+  let _ = sleep(1)
+
+  let _ = pthread_join(ptid, mutable_pointer[to: &ret])
+  let _ = pthread_detach(ptid)
+}
