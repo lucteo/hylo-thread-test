@@ -1,0 +1,10 @@
+
+fun thread_function() {
+  print("Hello from thread!")
+}
+
+public fun main() {
+  var os_thread = OSThread.spawn_thread(stack: 0, executing: fun() { thread_function() })
+  precondition(os_thread.id() >= 0, "Thread creation failed.")
+  os_thread.join()
+}
