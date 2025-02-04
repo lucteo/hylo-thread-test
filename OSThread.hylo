@@ -30,7 +30,7 @@ internal type OSThread {
   }
 
   internal fun yield_now() {
-    // TODO
+    let _ = sched_yield()
   }
 
   internal fun join() sink {

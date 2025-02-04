@@ -1,0 +1,2 @@
+@ffi("sched_yield")
+internal fun sched_yield() -> Int

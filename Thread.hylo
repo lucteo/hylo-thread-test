@@ -57,8 +57,9 @@ public fun spawn_thread(stack_size: UInt, executing f: sink []() -> Void) -> Thr
   .new(thread: OSThread.spawn_thread(stack: stack_size, executing: f))
 }
 
+/// Yields the current execution time slice to the operating system.
 public fun yield_now() {
-  // TODO
+  OSThread.yield_now()
 }
 
 /// Returns the available parallelism on the system.
