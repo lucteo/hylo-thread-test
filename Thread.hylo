@@ -18,9 +18,7 @@ public type ThreadId {
   }
 
 }
-conformance ThreadId: Deinitializable {}
-conformance ThreadId: Movable {}
-conformance ThreadId: Copyable {}
+conformance ThreadId: Regular {}
 
 
 /// Handler for a thread that is being executed.
