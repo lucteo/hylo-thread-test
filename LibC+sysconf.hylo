@@ -1,0 +1,2 @@
+@ffi("sysconf")
+internal fun sysconf(name: Int) -> Int

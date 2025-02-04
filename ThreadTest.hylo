@@ -7,4 +7,6 @@ public fun main() {
   var os_thread = OSThread.spawn_thread(stack: 0, executing: fun() { thread_function() })
   precondition(os_thread.id() >= 0, "Thread creation failed.")
   os_thread.join()
+  print("Available parallelism: ", terminator: "")
+  print(OSThread.available_parallelism())
 }

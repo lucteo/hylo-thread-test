@@ -48,8 +48,12 @@ internal type OSThread {
   }
 
   internal static fun available_parallelism() -> Int {
-    // TODO
-    0
+    let _SC_NPROCESSORS_ONLN = 58
+    let r = sysconf(name: _SC_NPROCESSORS_ONLN)
+    if r >= 0 {
+      return r
+    }
+    return 0
   }
 
   static fun take_address<T>(_ x: inout T) -> MemoryAddress {
