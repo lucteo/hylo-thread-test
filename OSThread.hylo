@@ -15,32 +15,40 @@ internal type OSThread {
   }
 
   internal static fun spawn_thread(stack: UInt, executing f: sink []() -> Void) -> OSThread {
-    // TODO: improve error handling
-    let pf = deref(take_address(&f))
-    var thread_id: pthread_t = -1
-    var attr: pthread_attr_t = .new()
-    let pattr = mutable_pointer[to: &attr]
-    if pthread_attr_init(pattr) != 0 { return .new() }
-    if stack > 0 {
-      if pthread_attr_setstacksize(pattr, Int(truncating_or_extending: stack)) != 0 { return .new() }
-    }
-    if pthread_create(mutable_pointer[to: &thread_id], pattr, pf) != 0 { return .new() }
+    #if os(Linux) || os(macOS)
+      // TODO: improve error handling
+      let pf = deref(take_address(&f))
+      var thread_id: pthread_t = -1
+      var attr: pthread_attr_t = .new()
+      let pattr = mutable_pointer[to: &attr]
+      if pthread_attr_init(pattr) != 0 { return .new() }
+      if stack > 0 {
+        if pthread_attr_setstacksize(pattr, Int(truncating_or_extending: stack)) != 0 { return .new() }
+      }
+      if pthread_create(mutable_pointer[to: &thread_id], pattr, pf) != 0 { return .new() }
 
-    return .new(id: thread_id)
+      return .new(id: thread_id)
+    #else
+      return .new()
+    #endif
   }
 
   internal fun yield_now() {
-    let _ = sched_yield()
+    #if os(Linux) || os(macOS)
+      let _ = sched_yield()
+    #endif
   }
 
   internal fun join() sink {
-    precondition(id >= 0, "Thread is not running while attempting to join it.")
-    // TODO: handle errors.
-    // TODO: handle return vales from the thread.
-    var ret: MemoryAddress = .null()
-    let _ = pthread_join(id, mutable_pointer[to: &ret])
-    let _ = pthread_detach(id)
-    &id = -1
+    #if os(Linux) || os(macOS)
+      precondition(id >= 0, "Thread is not running while attempting to join it.")
+      // TODO: handle errors.
+      // TODO: handle return vales from the thread.
+      var ret: MemoryAddress = .null()
+      let _ = pthread_join(id, mutable_pointer[to: &ret])
+      let _ = pthread_detach(id)
+      &id = -1
+    #endif
   }
 
   internal fun id() -> pthread_t {
@@ -48,11 +56,17 @@ internal type OSThread {
   }
 
   internal static fun available_parallelism() -> Int {
-    let _SC_NPROCESSORS_ONLN = 58
-    let r = sysconf(name: _SC_NPROCESSORS_ONLN)
-    if r >= 0 {
-      return r
-    }
+    #if os(Linux) || os(macOS)
+      #if os(Linux)
+        let _SC_NPROCESSORS_ONLN = 84
+      #elseif os(macOS)
+        let _SC_NPROCESSORS_ONLN = 58
+      #endif
+      let r = sysconf(name: _SC_NPROCESSORS_ONLN)
+      if r >= 0 {
+        return r
+      }
+      #endif
     return 0
   }
 
